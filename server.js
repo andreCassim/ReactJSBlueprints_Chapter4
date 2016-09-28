@@ -4,7 +4,7 @@ var  babelify = require("babelify");
 var  browserSync = require('browser-sync');
 var  app = express();
 var  port = process.env.PORT || 8080;
-
+var path = require("path");
 browserify.settings({
   transform: [babelify.configure({
   })],
@@ -13,21 +13,22 @@ browserify.settings({
   grep: /\.jsx?$/
 });
 
-app.get('/bundle.js', browserify(__dirname+'/source/app.jsx'));
+app.get(
+  '/bundle.js', 
+  browserify(__dirname+'/source/app.jsx')
+);
 
-// allowed file types
-app.get(['*.png','*.jpg','*.css','*.map'], function (req, res) {
-  res.sendFile(__dirname+"/public/"+req.path);
-});
-// all other requests will be routed to index.html
-app.get('*', function (req, res) {
-  res.sendFile(__dirname+"/public/index.html");
-});
+app.use(express.static('./public/'));
+
+app.use('/*', express.static('./public/index.html'));
 
 app.listen(port,function(){
   browserSync({
     proxy: 'localhost:' + port,
-    files: ['source/**/*.{jsx,js}','public/**/*.{css}'],
+    files: [
+      'source/**/*.{jsx,js}',
+      'public/**/*.{css}'
+    ],
     options: {
       ignored: 'node_modules'
     }
